@@ -1,0 +1,87 @@
+{
+  "title": "问卷网·愚人节「赛博生存」趣味测试",
+  "ptype": "assess",
+  "question_list": [
+    {
+      "title": "刷到标题党「震惊！明天起朋友圈只能发黑白」配图还是糊的，你会？",
+      "en_name": "QUESTION_TYPE_SINGLE",
+      "custom_attr": {
+        "show_seq": "on",
+        "total_score": 4,
+        "answer_score": "on",
+        "calculation": "only_one"
+      },
+      "option_list": [
+        { "title": "心里咯噔一下，先转给闺蜜求证", "is_open": false, "custom_attr": { "score": 1 } },
+        { "title": "划走又划回，评论区蹲一个「刚醒」", "is_open": false, "custom_attr": { "score": 2 } },
+        { "title": "看眼日期和信源，不信单条爆文", "is_open": false, "custom_attr": { "score": 3 } },
+        { "title": "截图做表情包，反手调戏群友", "is_open": false, "custom_attr": { "score": 4 } }
+      ]
+    },
+    {
+      "title": "室友突然严肃：「辅导员让你现在去办公室，别带手机。」你会？",
+      "en_name": "QUESTION_TYPE_SINGLE",
+      "custom_attr": {
+        "show_seq": "on",
+        "total_score": 4,
+        "answer_score": "on",
+        "calculation": "only_one"
+      },
+      "option_list": [
+        { "title": "脑子空白先换衣服，边走边复盘最近考勤", "is_open": false, "custom_attr": { "score": 1 } },
+        { "title": "假装淡定，其实已经在搜「四月一号宜不宜去办公室」", "is_open": false, "custom_attr": { "score": 2 } },
+        { "title": "微笑问：今天是不是有个国际节日？", "is_open": false, "custom_attr": { "score": 3 } },
+        { "title": "盯着他眼角三秒：哥，片酬结一下", "is_open": false, "custom_attr": { "score": 4 } }
+      ]
+    },
+    {
+      "title": "愚人节当天，你最想发哪种「钓鱼」动态测试谁会上当？",
+      "en_name": "QUESTION_TYPE_SINGLE",
+      "custom_attr": {
+        "show_seq": "on",
+        "total_score": 4,
+        "answer_score": "on",
+        "calculation": "only_one"
+      },
+      "option_list": [
+        { "title": "不发，互联网水太深我想躺平", "is_open": false, "custom_attr": { "score": 1 } },
+        { "title": "仅三天可见发个模糊背影，等追问再消失", "is_open": false, "custom_attr": { "score": 2 } },
+        { "title": "「重大决定，今晚八点发长文」吊胃口", "is_open": false, "custom_attr": { "score": 3 } },
+        { "title": "官宣/离职/中奖三连模板，谁急谁输", "is_open": false, "custom_attr": { "score": 4 } }
+      ]
+    },
+    {
+      "title": "刷朋友圈发现你被「仅你可见」的假官宣九宫格点名了，你会？",
+      "en_name": "QUESTION_TYPE_SINGLE",
+      "custom_attr": {
+        "show_seq": "on",
+        "total_score": 4,
+        "answer_score": "on",
+        "calculation": "only_one"
+      },
+      "option_list": [
+        { "title": "真情实感心跳漏一拍，点进主页才破案", "is_open": false, "custom_attr": { "score": 1 } },
+        { "title": "默默点赞，留证据等当事人社死", "is_open": false, "custom_attr": { "score": 2 } },
+        { "title": "评论：摄影不错，下次别带我", "is_open": false, "custom_attr": { "score": 3 } },
+        { "title": "立刻同等战力反制，九宫格换他丑照", "is_open": false, "custom_attr": { "score": 4 } }
+      ]
+    },
+    {
+      "title": "测完这份愚人节测试，你打算怎么分享给朋友？",
+      "en_name": "QUESTION_TYPE_SINGLE",
+      "custom_attr": {
+        "show_seq": "on",
+        "total_score": 4,
+        "answer_score": "on",
+        "calculation": "only_one"
+      },
+      "option_list": [
+        { "title": "不分享，独自美丽", "is_open": false, "custom_attr": { "score": 1 } },
+        { "title": "私发一两个死党，小范围处刑", "is_open": false, "custom_attr": { "score": 2 } },
+        { "title": "群聊丢链接：输的人请喝奶茶", "is_open": false, "custom_attr": { "score": 3 } },
+        { "title": "朋友圈/微博配文：今日人类样本采集，速来填坑", "is_open": false, "custom_attr": { "score": 4 } }
+      ]
+    }
+  ],
+  "survey_result": "[{\"scope\":[5,8],\"content\":\"【真情实感·愚人节限定小可爱】\\n\\n特质：心比较软、反应稍慢半拍，容易被梗带到情绪里，但反差萌就是社交货币。今日宜：多看一眼日历再心动。\\n\\n转发文案：「测完发现我是心软型……你也来认领一下？#问卷网愚人节趣味测试」\"},{\"scope\":[9,12],\"content\":\"【辣条级警觉·半信半玩型】\\n\\n特质：看热闹第一名，真遇事会愣一下再复盘；传播欲中等，适合当群里的理性投喂机。\\n\\n转发文案：「笑死，我卡在中间档——敢不敢来测，测完别找我报销奶茶。」\"},{\"scope\":[13,16],\"content\":\"【反钓鱼课代表·梗接住型】\\n\\n特质：对套路有直觉，接梗快、不轻易交情绪税；已经想好了测试结果要发给谁对线。\\n\\n转发文案：「愚人节可以开玩笑，脑子不能放假。问卷网这套测完我悟了，你也来。」\"},{\"scope\":[17,20],\"content\":\"【整蛊宇宙编外导演】\\n\\n特质：你在，故事就在；传播欲和反击欲双高，今日群聊流量你承包一半。\\n\\n转发文案：「链接在此，@好友 愚人节战力榜结算——问卷网趣味测，不服来战！」\"}]"
+}

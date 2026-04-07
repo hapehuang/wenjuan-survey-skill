@@ -1,92 +1,193 @@
-# Wenjuan Survey
+# 📋 问卷网 Skill
 
-wenjuan skill 
+[问卷网](https://www.wenjuan.com) 的 Skill 技能包，支持问卷的创建、导入、发布、查询、编辑、报表与数据导出。
 
-## Getting started
+## ✨ 功能特性
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- **创建并发布问卷** — 支持主题以及本地文本一键创建 + 导入 + 发布并轮询审核/状态
+- **获取项目列表** — 分页查询「我的问卷」
+- **获取问卷结构** — 查看项目详情（标题、页面、题目、选项等）
+- **更新项目与题目** — 修改标题/文案、编辑或删除题目、新增题目
+- **发布与停收** — 发布、停止收集等状态变更（亦包含在工作流内）
+- **查看报表与数据** — 打开报表页、导出原始数据、查看回收概况统计（如有配置）
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## 📦 项目结构
 
 ```
-cd existing_repo
-git remote add origin https://code.idiaoyan.cn/wj/rd/wenjuan-survey.git
-git branch -M main
-git push -uf origin main
+wenjuan-survey/
+├── SKILL.md                 # Skill 定义（AI Agent 优先阅读）
+├── setup.sh                 # 环境检测与依赖安装
+├── package.json
+├── references/              # 能力参考文档
+│   ├── auth.md
+│   ├── create_survey.md
+│   ├── list_projects.md
+│   ├── fetch_project.md
+│   ├── update_project.md
+│   ├── create_question.md
+│   ├── update_question.md
+│   ├── delete_question.md
+│   ├── publish_survey.md
+│   ├── get_report.md
+│   ├── export_data.md
+│   ├── overview_stats.md
+│   ├── bind_mobile.md
+│   ├── check_env.md
+│   ├── version_check.md
+│   └── ...                  # 其余见目录
+├── scripts/                 # 可执行脚本
+│   ├── login_auto.js
+│   ├── workflow_create_and_publish.js
+│   ├── import_project.js
+│   ├── list_projects.js
+│   ├── fetch_project.js
+│   ├── update_project.js
+│   ├── create_question.js
+│   ├── edit_question.js
+│   ├── delete_question.js
+│   ├── publish.js
+│   ├── open_report.js
+│   ├── export_data.js
+│   ├── overview_stats.js
+│   ├── bind_mobile.js
+│   └── ...
+└── README.md
 ```
 
-## Integrate with your tools
+## 🚀 快速开始
 
-- [ ] [Set up project integrations](https://code.idiaoyan.cn/wj/rd/wenjuan-survey/-/settings/integrations)
+### 前置依赖
 
-## Collaborate with your team
+- [Node.js](https://nodejs.org) `>= 18`
+- 可访问 [问卷网](https://www.wenjuan.com)
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+推荐使用一键环境脚本（检测 Node、安装 `npm` 依赖）：
 
-## Test and Deploy
+```bash
+bash ./setup.sh
+```
 
-Use the built-in continuous integration in GitLab.
+或手动安装依赖：
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```bash
+npm install
+```
 
-***
+### 登录授权
 
-# Editing this README
+微信扫码登录，凭证会写入 `~/.wenjuan/` 与项目内 `.wenjuan/auth.json`。详见 [references/auth.md](references/auth.md)。
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+node scripts/login_auto.js --max-time 300
+```
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### 验证环境（不检查登录）
 
-## Name
-Choose a self-explaining name for your project.
+```bash
+node scripts/check_env.js
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## 🔧 工具列表
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+以 **Skill 能力名** 对应 **实现脚本** 与 **参考文档**（Agent / 人工均可直接打开 `references`）。
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+| 能力                | 说明                                                       | 参考文档                                                |
+| ----------------- | -------------------------------------------------------- | --------------------------------------------------- |
+| `create_survey`   | 创建并发布：默认模板或题目 JSON；工作流见 `workflow_create_and_publish.js` | [create_survey.md](references/create_survey.md)     |
+| `import_project`  | 仅按「完整项目 JSON」导入（需含 `title`、`question_list` 等）            | （脚本 `import_project.js`，流程见 create_survey）          |
+| `list_projects`   | 获取我的问卷列表                                                 | [list_projects.md](references/list_projects.md)     |
+| `fetch_project`   | 获取项目详细结构                                                 | [fetch_project.md](references/fetch_project.md)     |
+| `update_project`  | 更新项目信息（标题、欢迎语、结束语等）                                      | [update_project.md](references/update_project.md)   |
+| `create_question` | 在项目中新增题目                                                 | [create_question.md](references/create_question.md) |
+| `update_question` | 更新单题（`edit_question.js`）                                 | [update_question.md](references/update_question.md) |
+| `delete_question` | 删除题目                                                     | [delete_question.md](references/delete_question.md) |
+| `publish_survey`  | 发布 / 停止收集等                                               | [publish_survey.md](references/publish_survey.md)   |
+| `get_report`      | 查看报表（`open_report.js`，可控制是否唤起浏览器）                        | [get_report.md](references/get_report.md)           |
+| `export_data`     | 导出原始答题数据                                                 | [export_data.md](references/export_data.md)         |
+| `overview_stats`  | 回收概况（答卷数、浏览、完成率等，视账号与接口而定）                               | [overview_stats.md](references/overview_stats.md)   |
+| `bind_mobile`     | 绑定手机号（部分发布场景需要）                                          | [bind_mobile.md](references/bind_mobile.md)         |
+| `check_version`   | 检查 Skill 版本说明                                            | [version_check.md](references/version_check.md)     |
+| `check_env`       | 检查 Node 与依赖安装                                            | [check_env.md](references/check_env.md)             |
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### 调用示例
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```bash
+# 登录（扫码）
+node scripts/login_auto.js --max-time 300
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+# 一键：创建 + 导入题目 + 发布（题目文件为「题目数组」或完整项目 JSON，见 create_survey 文档）
+node scripts/workflow_create_and_publish.js \
+  --file questions.json \
+  --title "我的问卷" \
+  --type survey
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+# 项目列表（需 JWT，可从 .wenjuan/auth.json 读取 access_token）
+node scripts/list_projects.js -t "<access_token>" -p 1 -n 20
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+# 获取项目结构（参数以 fetch_project 文档为准）
+node scripts/fetch_project.js --help
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+# 导入完整项目 JSON（非「仅工作流」场景时使用）
+node scripts/import_project.js -f project.json
+```
 
-## License
-For open source projects, say how it is licensed.
+更多参数与边界（`--url`、`--stdin`、`--type` 等）见 [references/create_survey.md](references/create_survey.md)。
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## 📝 项目类型（对应 `--type`）
+
+
+| `--type` | 场景      | 说明                  |
+| -------- | ------- | ------------------- |
+| `survey` | 调研      | 通用问卷调查              |
+| `vote`   | 投票 / 评选 | 投票类项目               |
+| `form`   | 表单      | 报名、登记、信息收集          |
+| `assess` | 测评 / 考试 | 打分、测验类（题目结构需符合测评规范） |
+
+
+## 📐 数据模型（简要）
+
+问卷网侧以「项目（Project）」为核心，脚本与 JSON 导入通常包含：
+
+```
+项目（Project）
+├── 基本信息：title、type_id、p_type、status …
+├── question_list[]（题目）
+│   ├── title、en_name（题型）
+│   ├── custom_attr（展示与题型相关配置）
+│   └── option_list[]（选项；部分题型固定占位）
+└── …
+```
+
+字段与题型细节见 [references/project_json_structure_guide.md](references/project_json_structure_guide.md) 及各 `references`。
+
+## 🔗 URL 说明
+
+- **答题链接**（有短链 id 时）：`https://www.wenjuan.com/s/{short_id}`
+- **报表**（按项目 id）：`https://www.wenjuan.com/report/topic/{project_id}`（具体以平台与 `open_report.js` 为准）
+
+从链接或控制台输出中取得 `project_id` / `short_id` 后，即可配合 `fetch_project`、`open_report`、`export_data` 等脚本使用。
+
+## 🤖 AI Agent 集成
+
+本 Skill 以 **文档 + 脚本** 方式集成：
+
+1. **入口**：阅读根目录 [SKILL.md](SKILL.md) 与 [references/](references/) 中对应能力的 `.md`
+2. **执行**：在仓库目录下通过 `node scripts/<脚本>.js` 调用（登录态见 `.wenjuan/auth.json`）
+3. **建议流程**：凡是「新建/导入/发布」，优先 [references/create_survey.md](references/create_survey.md) 中的 `workflow_create_and_publish.js` 工作流
+
+## ❓ 常见问题
+
+
+| 现象 / 错误                     | 说明                           | 处理建议                                                  |
+| --------------------------- | ---------------------------- | ----------------------------------------------------- |
+| `认证失败` / `10001` / Token 无效 | 登录态过期或未登录                    | 重新执行 `node scripts/login_auto.js`                     |
+| 发布提示绑定手机号                   | 平台风控或账号要求                    | 按 [bind_mobile.md](references/bind_mobile.md) 完成绑定后重试 |
+| 发布后长时间「审核中」                 | 平台审核队列                       | 工作流会轮询；也可在网页端查看审核状态                                   |
+| 列表脚本要求 `-t`                 | `list_projects.js` 需显式传入 JWT | 从 `.wenjuan/auth.json` 读取 `access_token` 传入           |
+
+
+## 📄 许可
+
+本项目代码许可见 [package.json](package.json) 中的 `license` 字段。问卷网平台版权归问卷网所有。使用请遵守 [问卷网](https://www.wenjuan.com) 服务条款与当地法律法规。
