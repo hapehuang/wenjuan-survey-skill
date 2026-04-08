@@ -255,7 +255,7 @@ async function createAndImportProject(title, ptype, questions, projectExtras = {
     title: title,
     type_id: typeInfo.type_id,
     p_type: typeInfo.p_type,
-    ai_source: 11,
+    ai_source: 12,
     import_type: "0",
     question_list: questions,
     ...projectExtras,
