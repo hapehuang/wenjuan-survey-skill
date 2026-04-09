@@ -713,6 +713,159 @@ function parseImportedPayload(fileData, title, ptype) {
 }
 
 /**
+ * 规范化导入题目结构，避免部分题型缺少关键字段导致线上结构残缺
+ */
+function normalizeQuestionsForImport(questions, ptype = "survey") {
+  if (!Array.isArray(questions)) return [];
+  const isAssess = ptype === "assess";
+
+  const toOption = (opt, title, extraCustom = {}) => ({
+    title: opt?.title != null && String(opt.title).trim() ? String(opt.title) : title,
+    is_open: false,
+    custom_attr: { ...(opt?.custom_attr || {}), ...extraCustom },
+  });
+
+  return questions.map((q) => {
+    if (!q || typeof q !== "object") return q;
+    const out = { ...q };
+    const enName = String(out.en_name || "").toUpperCase();
+    const optionList = Array.isArray(out.option_list) ? out.option_list : [];
+    const customAttr = { ...(out.custom_attr || {}) };
+    if (!customAttr.show_seq) customAttr.show_seq = "on";
+
+    // 判断题：必须双选项（是/否）
+    if (customAttr.disp_type === "judge") {
+      const o1 = toOption(optionList[0], "是", isAssess ? { score: 0 } : {});
+      const o2 = toOption(optionList[1], "否", isAssess ? { score: 0 } : {});
+      out.custom_attr = customAttr;
+      out.option_list = [o1, o2];
+      return out;
+    }
+
+    // 填空题及其常见预设题（姓名/手机号/邮箱等）
+    const isBlankLike =
+      enName === "QUESTION_TYPE_BLANK" ||
+      enName === "QUESTION_TYPE_NAME" ||
+      enName === "QUESTION_TYPE_MOBILE" ||
+      enName === "QUESTION_TYPE_EMAIL" ||
+      Number(out.question_type) === 6;
+    if (isBlankLike) {
+      const blankTypeRaw = String(customAttr.blank_type || "").toLowerCase();
+      const blankType = blankTypeRaw === "multiple" ? "multiple" : "single";
+      customAttr.blank_type = blankType;
+      const defaultRow = blankType === "multiple" ? 4 : 1;
+      out.custom_attr = customAttr;
+      out.option_list =
+        optionList.length > 0
+          ? optionList.map((opt, idx) =>
+              toOption(opt, `填空${idx + 1}`, {
+                text_row: opt?.custom_attr?.text_row ?? defaultRow,
+                text_col: opt?.custom_attr?.text_col ?? 20,
+                ...(isAssess && opt?.custom_attr?.score == null ? { score: 0 } : {}),
+              })
+            )
+          : [
+              toOption(null, "填空1", {
+                text_row: defaultRow,
+                text_col: 20,
+                ...(isAssess ? { score: 0 } : {}),
+              }),
+            ];
+      return out;
+    }
+
+    // 单选/多选：补默认 option_list
+    const isSingleLike =
+      enName === "QUESTION_TYPE_SINGLE" ||
+      enName === "QUESTION_TYPE_SEX" ||
+      enName === "QUESTION_TYPE_AGE" ||
+      enName === "QUESTION_TYPE_EDUCATION" ||
+      Number(out.question_type) === 2;
+    if (isSingleLike) {
+      out.custom_attr = customAttr;
+      out.option_list =
+        optionList.length >= 2
+          ? optionList.map((opt, idx) => toOption(opt, `选项${idx + 1}`))
+          : [toOption(optionList[0], "选项1"), toOption(optionList[1], "选项2")];
+      return out;
+    }
+
+    const isMultipleLike =
+      enName === "QUESTION_TYPE_MULTIPLE" || Number(out.question_type) === 3;
+    if (isMultipleLike) {
+      out.custom_attr = customAttr;
+      out.option_list =
+        optionList.length >= 2
+          ? optionList.map((opt, idx) => toOption(opt, `选项${idx + 1}`))
+          : [toOption(optionList[0], "选项1"), toOption(optionList[1], "选项2")];
+      return out;
+    }
+
+    // 打分题/NPS：补 1 条占位选项
+    const isScoreLike =
+      enName === "QUESTION_TYPE_SCORE" || Number(out.question_type) === 50;
+    if (isScoreLike) {
+      out.custom_attr = customAttr;
+      out.option_list = optionList.length > 0 ? optionList.map((opt) => toOption(opt, "选项1")) : [toOption(null, "选项1")];
+      return out;
+    }
+
+    // 日期/上传/签名等 95 类：至少 1 条；time 至少 2 条（时/分）
+    const isDateLike = enName === "QUESTION_TYPE_DATE" || customAttr.disp_type === "date";
+    const isTimeLike = customAttr.disp_type === "time";
+    const isUploadLike =
+      enName === "QUESTION_TYPE_UPLOAD" ||
+      enName === "QUESTION_TYPE_IMAGE_UPLOAD" ||
+      enName === "QUESTION_TYPE_SIGNATURE" ||
+      customAttr.disp_type === "upload_file" ||
+      customAttr.disp_type === "image_upload" ||
+      customAttr.disp_type === "signature" ||
+      Number(out.question_type) === 95;
+    if (isTimeLike) {
+      out.custom_attr = customAttr;
+      out.option_list = [toOption(optionList[0], "时"), toOption(optionList[1], "分")];
+      return out;
+    }
+    if (isDateLike || isUploadLike) {
+      out.custom_attr = customAttr;
+      const fallbackTitle =
+        customAttr.disp_type === "upload_file"
+          ? "选择文件上传"
+          : customAttr.disp_type === "image_upload"
+            ? "请上传图片"
+            : customAttr.disp_type === "signature"
+              ? "填空1"
+              : "选项1";
+      out.option_list = optionList.length > 0 ? optionList.map((opt) => toOption(opt, fallbackTitle)) : [toOption(null, fallbackTitle)];
+      return out;
+    }
+
+    // 地址题：建议四段地址
+    const isAddressLike =
+      enName === "QUESTION_TYPE_ADDRESS" ||
+      customAttr.disp_type === "address" ||
+      customAttr.drop_type === "address";
+    if (isAddressLike) {
+      customAttr.disp_type = customAttr.disp_type || "address";
+      customAttr.drop_type = customAttr.drop_type || "address";
+      out.custom_attr = customAttr;
+      out.option_list = [
+        toOption(optionList[0], "省份"),
+        toOption(optionList[1], "城市"),
+        toOption(optionList[2], "区/县"),
+        toOption(optionList[3], "详细地址"),
+      ];
+      return out;
+    }
+
+    // 其余题型保持原样，仅保障 custom_attr 为对象
+    out.custom_attr = customAttr;
+    out.option_list = optionList;
+    return out;
+  });
+}
+
+/**
  * 从 http(s) URL 拉取 JSON（题目列表或完整项目对象）
  */
 async function fetchJsonFromUrl(urlStr) {
@@ -863,6 +1016,7 @@ async function workflowCreateAndPublish(
   
   // 步骤 2: 创建项目并导入题目
   console.log("\n📋 步骤 1/3: 创建项目并导入题目...");
+  questions = normalizeQuestionsForImport(questions, fileType);
   if (projectExtras && Object.keys(projectExtras).length > 0) {
     console.log(`   附加字段: ${Object.keys(projectExtras).join(", ")}`);
   }
@@ -1142,6 +1296,7 @@ module.exports = {
   pollAuditStatus,
   waitForProjectStatus,
   generateDefaultQuestions,
+  normalizeQuestionsForImport,
   fetchJsonFromUrl,
   parseImportedPayload,
 };
