@@ -4,15 +4,18 @@
  * 一键完成：创建项目 → 导入题目 → 发布项目
  */
 
-const axios = require('axios');
+const { createSecureAxios } = require("./axios_secure");
 const fs = require('fs').promises;
 const path = require('path');
 const { execSync } = require('child_process');
 const { resolveAccessToken } = require('./token_store');
+const { validateQuestionList } = require("./security_utils");
+const { WENJUAN_HOST, wenjuanUrl } = require("./api_config");
+const http = createSecureAxios();
 
 // API 地址
-const IMPORT_URL = "https://www.wenjuan.com/edit/api/textproject/?jwt=1";
-const PUBLISH_URL = "https://www.wenjuan.com/edit/api/update_project_status/?jwt=1";
+const IMPORT_URL = wenjuanUrl("/edit/api/textproject/?jwt=1");
+const PUBLISH_URL = wenjuanUrl("/edit/api/update_project_status/?jwt=1");
 
 // 项目类型映射
 const PROJECT_TYPES = {
@@ -268,7 +271,7 @@ async function createAndImportProject(title, ptype, questions, projectExtras = {
   
   try {
     // 提交导入请求
-    const response = await axios.post(IMPORT_URL, { project_json: projectData }, { headers });
+    const response = await http.post(IMPORT_URL, { project_json: projectData }, { headers });
     const result = response.data;
     
     if (result.status_code !== 1) {
@@ -288,7 +291,7 @@ async function createAndImportProject(title, ptype, questions, projectExtras = {
     for (let i = 0; i < 30; i++) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const statusResp = await axios.get(`${IMPORT_URL}&fingerprint=${fingerprint}`, { headers });
+      const statusResp = await http.get(`${IMPORT_URL}&fingerprint=${fingerprint}`, { headers });
       const status = statusResp.data;
       const data = status.data || {};
       
@@ -342,7 +345,7 @@ async function publishProjectApi(projectId) {
   };
   
   try {
-    const response = await axios.post(PUBLISH_URL, data, { headers });
+    const response = await http.post(PUBLISH_URL, data, { headers });
     const result = response.data;
     
     // 检查 status_code
@@ -422,7 +425,7 @@ async function bindMobile() {
   console.log(`✓ 获取成功，有效期 ${uidResult.expireSeconds} 秒`);
   
   // 2. 打开浏览器
-  const bindUrl = `https://www.wenjuan.com/auth/mobile_bind/?uid=${uid}`;
+  const bindUrl = `${WENJUAN_HOST}/auth/mobile_bind/?uid=${uid}`;
   console.log(`\n[2/3] 绑定页面地址: ${bindUrl}`);
   console.log("\n正在打开浏览器...");
 
@@ -529,11 +532,11 @@ async function waitForProjectStatus(projectId, maxWaitSeconds = 120) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const { buildSignedUrl } = require('./generate_sign');
-      const url = buildSignedUrl('https://www.wenjuan.com/app_api/edit/edit_project/', { 
+      const url = await buildSignedUrl(wenjuanUrl("/app_api/edit/edit_project/"), { 
         project_id: projectId 
       });
       
-      const response = await axios.get(url, {
+      const response = await http.get(url, {
         headers: { "Authorization": `Bearer ${jwtToken}` },
         timeout: 10000
       });
@@ -669,7 +672,7 @@ async function publishProjectFullFlow(projectId) {
   if (finalStatus.success) {
     console.log(`   ✅ 项目状态: ${finalStatus.statusText}`);
     if (finalStatus.short_id) {
-      console.log(`   📎 短链接: https://www.wenjuan.com/s/${finalStatus.short_id}`);
+      console.log(`   📎 短链接: ${WENJUAN_HOST}/s/${finalStatus.short_id}`);
     }
   } else {
     console.log(`   ⚠️ ${finalStatus.error || "获取状态超时"}`);
@@ -878,7 +881,7 @@ async function fetchJsonFromUrl(urlStr) {
   if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
     throw new Error("仅支持 http/https 链接");
   }
-  const response = await axios.get(urlStr, {
+  const response = await http.get(urlStr, {
     timeout: 45000,
     maxContentLength: 5 * 1024 * 1024,
     responseType: "text",
@@ -1017,6 +1020,7 @@ async function workflowCreateAndPublish(
   // 步骤 2: 创建项目并导入题目
   console.log("\n📋 步骤 1/3: 创建项目并导入题目...");
   questions = normalizeQuestionsForImport(questions, fileType);
+  validateQuestionList(questions);
   if (projectExtras && Object.keys(projectExtras).length > 0) {
     console.log(`   附加字段: ${Object.keys(projectExtras).join(", ")}`);
   }
@@ -1124,7 +1128,7 @@ async function workflowCreateAndPublish(
   if (finalStatus.success) {
     console.log(`   ✅ 项目状态: ${finalStatus.statusText}`);
     if (finalStatus.short_id) {
-      console.log(`   📎 短链接: https://www.wenjuan.com/s/${finalStatus.short_id}`);
+      console.log(`   📎 短链接: ${WENJUAN_HOST}/s/${finalStatus.short_id}`);
     }
   } else {
     console.log(`   ⚠️ ${finalStatus.error || '获取状态超时'}`);
@@ -1142,7 +1146,7 @@ async function workflowCreateAndPublish(
   console.log(`🔗 项目ID: ${projectId}`);
   console.log(`📝 题目数量: ${questions.length}`);
   if (shortId) {
-    console.log(`\n📎 答题链接: https://www.wenjuan.com/s/${shortId}`);
+    console.log(`\n📎 答题链接: ${WENJUAN_HOST}/s/${shortId}`);
   }
   if (publishResult.pending) {
     console.log(`\n⏳ 状态: 审核中，请等待平台审核通过`);

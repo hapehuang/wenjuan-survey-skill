@@ -10,7 +10,7 @@ description: "问卷网（[www.wenjuan.com](https://www.wenjuan.com)）- 人人�
 
 homepage: [https://www.wenjuan.com](https://www.wenjuan.com)
 
-version: 1.0.0
+version: 1.0.1
 
 ---
 

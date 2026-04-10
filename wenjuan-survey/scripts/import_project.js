@@ -8,9 +8,10 @@ const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 const { resolveAccessToken } = require('./token_store');
+const { WENJUAN_HOST, wenjuanUrl } = require("./api_config");
 
 // API 地址
-const IMPORT_URL = "https://www.wenjuan.com/edit/api/textproject/?jwt=1";
+const IMPORT_URL = wenjuanUrl("/edit/api/textproject/?jwt=1");
 
 /** 从本地文件读取 JWT（逻辑见 token_store.js） */
 async function getToken() {
@@ -163,7 +164,7 @@ async function main() {
     console.log("✅ 项目导入成功！");
     console.log(`   项目ID: ${statusResult.project_id}`);
     if (statusResult.short_id) {
-      console.log(`   短链(导入阶段): https://www.wenjuan.com/s/${statusResult.short_id}`);
+      console.log(`   短链(导入阶段): ${WENJUAN_HOST}/s/${statusResult.short_id}`);
     }
 
     let publishOutcome = null;
@@ -191,7 +192,7 @@ async function main() {
     } else if (autoPublish && publishOutcome && publishOutcome.success) {
       console.log("\n✅ 已自动发布（收集中）");
       if (publishOutcome.short_id) {
-        console.log(`   答题链接: https://www.wenjuan.com/s/${publishOutcome.short_id}`);
+        console.log(`   答题链接: ${WENJUAN_HOST}/s/${publishOutcome.short_id}`);
       }
     } else if (!autoPublish) {
       console.log("\n💡 已跳过发布（--no-publish），项目处于编辑中，请手动在问卷网点击发布。");

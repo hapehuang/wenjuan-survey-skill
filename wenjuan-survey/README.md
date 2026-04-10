@@ -73,6 +73,26 @@ bash ./setup.sh
 npm install
 ```
 
+### 安全配置（必填）
+
+签名已改为服务端代签，签名地址固定为：
+
+```bash
+https://www.wenjuan.com/app_api/create/signature
+```
+
+本地无需配置 `WENJUAN_SIGN_SERVICE_TOKEN`。
+
+可选安全项：
+
+```bash
+# 客户端最小请求间隔（毫秒，默认 200）
+export WENJUAN_MIN_REQUEST_INTERVAL_MS=200
+
+# 启用 TLS 证书 pin（sha256 十六进制；不配置则仅做标准 TLS 校验）
+export WENJUAN_TLS_PIN_SHA256="<cert_sha256_hex>"
+```
+
 ### 登录授权
 
 微信扫码登录，凭证会写入 `~/.wenjuan/` 与项目内 `.wenjuan/auth.json`。详见 [references/auth.md](references/auth.md)。
