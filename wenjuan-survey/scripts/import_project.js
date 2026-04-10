@@ -9,6 +9,31 @@ const fs = require('fs').promises;
 const path = require('path');
 const { resolveAccessToken } = require('./token_store');
 const { WENJUAN_HOST, wenjuanUrl } = require("./api_config");
+const { normalizeQuestionsForImport } = require("./workflow_create_and_publish.js");
+
+function inferPtypeForNormalize(projectData) {
+  const v = projectData.ptype_enname || projectData.ptype || projectData.fileType;
+  if (typeof v === "string" && /^(survey|assess|form|vote)$/i.test(v)) {
+    return v.toLowerCase();
+  }
+  return "survey";
+}
+
+/** 导入前规范化题目（含评分题补全 custom_attr，避免 textproject 落库缺字段） */
+function normalizeProjectQuestionsIfAny(projectData) {
+  const raw =
+    Array.isArray(projectData.question_list) && projectData.question_list.length
+      ? projectData.question_list
+      : Array.isArray(projectData.questions) && projectData.questions.length
+        ? projectData.questions
+        : null;
+  if (!raw) return;
+  const normalized = normalizeQuestionsForImport(raw, inferPtypeForNormalize(projectData));
+  projectData.question_list = normalized;
+  if (Array.isArray(projectData.questions)) {
+    projectData.questions = normalized;
+  }
+}
 
 // API 地址
 const IMPORT_URL = wenjuanUrl("/edit/api/textproject/?jwt=1");
@@ -128,7 +153,8 @@ async function main() {
     // 读取项目文件
     const content = await fs.readFile(filePath, 'utf-8');
     const projectData = JSON.parse(content);
-    
+    normalizeProjectQuestionsIfAny(projectData);
+
     console.log("📂 正在导入项目...");
     console.log(`   标题: ${projectData.title || '未命名'}`);
     console.log(`   题目数量: ${(projectData.question_list || projectData.questions || []).length}`);

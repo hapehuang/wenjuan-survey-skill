@@ -148,11 +148,14 @@ function generateDefaultQuestions(ptype, scene = null) {
       {
         title: "您对学校生活的整体满意度",
         en_name: "QUESTION_TYPE_SCORE",
+        question_type: 50,
         custom_attr: {
           show_seq: "on",
           disp_type: "scale",
           min_answer_num: 1,
-          max_answer_num: 5,
+          max_answer_num: 10,
+          magnitude_scale: 1,
+          score_total: 10,
           desc_left: "非常不满意",
           desc_right: "非常满意"
         },
@@ -777,6 +780,53 @@ function normalizeQuestionsForImport(questions, ptype = "survey") {
       return out;
     }
 
+    // 打分题/NPS：必须在「question_type===2 单选」之前处理，否则 en_name 为 SCORE 但误带 type 2 时会被当成单选
+    const isScoreLike =
+      enName === "QUESTION_TYPE_SCORE" || Number(out.question_type) === 50;
+    if (isScoreLike) {
+      const isNps = customAttr.disp_type === "nps_score";
+      const parseBound = (v, fallback) => {
+        if (v == null || v === "") return fallback;
+        const n = parseInt(String(v), 10);
+        return Number.isFinite(n) ? n : fallback;
+      };
+      let minV = parseBound(customAttr.min_answer_num, isNps ? 0 : 1);
+      let maxV = parseBound(customAttr.max_answer_num, NaN);
+      if (!Number.isFinite(maxV)) {
+        const fromTotal = parseBound(customAttr.score_total, NaN);
+        maxV = Number.isFinite(fromTotal) && fromTotal > 0 ? fromTotal : 10;
+      }
+      if (maxV <= minV) {
+        maxV = isNps ? 10 : Math.max(10, minV + 1);
+      }
+      customAttr.min_answer_num = minV;
+      customAttr.max_answer_num = maxV;
+      let mag = 1;
+      if (customAttr.magnitude_scale != null && customAttr.magnitude_scale !== "") {
+        const parsed = parseInt(String(customAttr.magnitude_scale), 10);
+        if (Number.isFinite(parsed) && parsed > 0) mag = parsed;
+      }
+      customAttr.magnitude_scale = mag;
+      if (isNps) {
+        if (!customAttr.disp_type) customAttr.disp_type = "nps_score";
+      } else if (!customAttr.disp_type) {
+        customAttr.disp_type = "scale";
+      }
+      if (customAttr.score_total == null || customAttr.score_total === "") {
+        customAttr.score_total = maxV;
+      } else {
+        const pst = parseInt(String(customAttr.score_total), 10);
+        customAttr.score_total = Number.isFinite(pst) && pst > 0 ? pst : maxV;
+      }
+      if (!out.en_name) out.en_name = "QUESTION_TYPE_SCORE";
+      out.question_type = 50;
+      out.question_min_score = minV;
+      out.question_max_score = maxV;
+      out.custom_attr = customAttr;
+      out.option_list = optionList.length > 0 ? optionList.map((opt) => toOption(opt, "选项1")) : [toOption(null, "选项1")];
+      return out;
+    }
+
     // 单选/多选：补默认 option_list
     const isSingleLike =
       enName === "QUESTION_TYPE_SINGLE" ||
@@ -801,15 +851,6 @@ function normalizeQuestionsForImport(questions, ptype = "survey") {
         optionList.length >= 2
           ? optionList.map((opt, idx) => toOption(opt, `选项${idx + 1}`))
           : [toOption(optionList[0], "选项1"), toOption(optionList[1], "选项2")];
-      return out;
-    }
-
-    // 打分题/NPS：补 1 条占位选项
-    const isScoreLike =
-      enName === "QUESTION_TYPE_SCORE" || Number(out.question_type) === 50;
-    if (isScoreLike) {
-      out.custom_attr = customAttr;
-      out.option_list = optionList.length > 0 ? optionList.map((opt) => toOption(opt, "选项1")) : [toOption(null, "选项1")];
       return out;
     }
 
